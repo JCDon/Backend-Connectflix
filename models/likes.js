@@ -1,5 +1,5 @@
 module.exports = function(sequelize, DataTypes) {
-  var Likes = sequelize.define("Post", {
+  var Likes = sequelize.define("Likes", {
     movie_title: DataTypes.STRING,
     movie_genre: DataTypes.STRING
   });

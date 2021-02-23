@@ -1,6 +1,6 @@
 -- Drops the blogger if it exists currently --
-DROP DATABASE IF EXISTS connecflixdb;
+DROP DATABASE IF EXISTS connectflixdb;
 -- Creates the "blogger" database --
-CREATE DATABASE connecflixdb;
+CREATE DATABASE connectflixdb;
 
-USE connecflixdb;
+USE connectflixdb;
