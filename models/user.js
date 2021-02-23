@@ -15,6 +15,20 @@ module.exports = function(sequelize, DataTypes) {
       onDelete: "cascade"
     });
   };
+  User.associate = function(models) {
+    // Associating User with Dislikes
+    // When an User is deleted, also delete any associated Dislikes
+    User.hasMany(models.Dislikes, {
+      onDelete: "cascade"
+    });
+  };
+  User.associate = function(models) {
+    // Associating User with Friends
+    // When an User is deleted, also delete any associated Friends
+    User.hasMany(models.Friends, {
+      onDelete: "cascade"
+    });
+  };
 
   return User;
 };
