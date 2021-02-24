@@ -7,5 +7,15 @@ module.exports = function(sequelize, DataTypes) {
         last_name: DataTypes.STRING
     });
 
+    Friends.associate = function(models) {
+        // We're saying that a Friends should belong to an User
+        // A Like can't be created without an User due to the foreign key constraint
+        Friends.belongsTo(models.User, {
+          foreignKey: {
+            allowNull: false
+          }
+        });
+      };
+    
     return Friends;
 };
