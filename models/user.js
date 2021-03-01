@@ -15,20 +15,7 @@ module.exports = function(sequelize, DataTypes) {
     User.hasMany(models.Likes, {
       onDelete: "cascade"
     });
-  };
-  User.associate = function(models) {
-    // Associating User with Dislikes
-    // When an User is deleted, also delete any associated Dislikes
-    User.hasMany(models.Dislikes, {
-      onDelete: "cascade"
-    });
-  };
-  User.associate = function(models) {
-    // Associating User with Friends
-    // When an User is deleted, also delete any associated Friends
-    User.hasMany(models.Friends, {
-      onDelete: "cascade"
-    });
+    User.belongsToMany(models.User, { as: 'Friend', through: 'UserFriend' });
   };
 
   User.prototype.validPassword = function(password) {
