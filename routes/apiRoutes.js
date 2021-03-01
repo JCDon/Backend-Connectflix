@@ -8,7 +8,7 @@ const User = require("../models/user");
 
 
 module.exports = function (app, sequelize) {
-
+  // Signup Route
     app.post("/api/signup", function (req, res) {
         db.User.create({
             username: req.body.username,
@@ -24,32 +24,52 @@ module.exports = function (app, sequelize) {
             res.status(500).json(err)
         })
     });
+    
+    // Login Route
     app.post("/api/login", (req, res) => {
-        console.log("hitting login");
-        db.User.findOne({
-          where: {
-            username: req.body.username
-          }
-        }).then(userData => {
-          if (!userData) {
-            req.session.destroy()
-            res.status(404).send("No such user exists!")
-          } else {
-            if (bcrypt.compareSync(req.body.password, userData.password)) {
-              req.session.user = {
-                // id: userData.id,
-                username: userData.username,
-                first_name: userData.first_name,
-                last_name: userData.last_name,
-              }
-              res.json(userData)
-            } else {
-              req.session.destroy()
-              res.status(401).send("Wrong password")
+      console.log("hitting login");
+      db.User.findOne({
+        where: {
+          username: req.body.username
+        }
+      }).then(userData => {
+        if (!userData) {
+          req.session.destroy()
+          res.status(404).send("No such user exists!")
+        } else {
+          console.log(`${req.body.password}, ${userData.password}`);
+          
+          if (bcrypt.compareSync(req.body.password, userData.password)) {
+            req.session.user = {
+              id: userData.id,
+              username: userData.username,
+              first_name: userData.first_name,
+              last_name: userData.last_name,
             }
+            res.json(userData)
+          } else {
+            req.session.destroy()
+            res.status(401).send("Wrong password")
           }
-        }).catch(err => {
-          res.status(500).json(err)
-        });
+        }
+      }).catch(err => {
+        res.status(500).json(err)
       });
+    });
+
+    // Likes route to record which movies are liked by user
+    app.post("/api/likes", function (req, res) {
+        db.Likes.create({
+          title: req.body.title,
+          poster: req.body.poster,
+          imdb: req.body.imdb,
+          synopsis: req.body.synopsis
+        }).then(data=>{
+            res.json(data)
+        
+        }).catch(err=>{
+            console.log(err);
+            res.status(500).json(err)
+        })
+    });
 }
