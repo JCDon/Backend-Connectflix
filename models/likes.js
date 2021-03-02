@@ -1,7 +1,9 @@
 module.exports = function(sequelize, DataTypes) {
   var Likes = sequelize.define("Likes", {
-    movie_title: DataTypes.STRING,
-    movie_genre: DataTypes.STRING
+    title: DataTypes.STRING,
+    poster: DataTypes.STRING,
+    imdb: DataTypes.STRING,
+    synopsis: DataTypes.STRING
   });
 
   Likes.associate = function(models) {
