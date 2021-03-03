@@ -21,7 +21,7 @@ const authenticateMe = (req)=>{
     }
     let data = false;
     if(token){
-        data = jwt.verify(token,"catscatscats",(err,data)=>{
+        data = jwt.verify(token,"connectflix",(err,data)=>{
             if(err) {
                 return false;
             } else {
@@ -46,7 +46,12 @@ module.exports = function (app, sequelize) {
             // last_name: req.body.last_name
         ).then(newUser=>{
           const token = jwt.sign({
-
+            username: newUser.username,
+            email: newUser.email,
+            id: newUser.id
+          }, "connectflix",
+          {
+            expiresIn: "5h"
           })
             res.json(newUser)
         
@@ -76,10 +81,11 @@ module.exports = function (app, sequelize) {
          else if (bcrypt.compareSync(req.body.password, userData.password)) {
            const token = jwt.sign({
             username: userData.username,
+            email: userData.email,
             id: userData.id
           }, "connectflix",
           {
-            expiresIn: "2h"
+            expiresIn: "5h"
           })
             // req.session.user = {
             //   id: userData.id,
