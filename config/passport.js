@@ -1,7 +1,9 @@
 'use strict';
+const jwtSecret = "./jwtconfig";
 const passport = require(`passport`);
 const LocalStrategy = require(`passport-local`).Strategy;
 const db = require(`../models`);
+const JWTstrategy = require("passport-jwt").Strategy
 passport.use(
   new LocalStrategy(
     {

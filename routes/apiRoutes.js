@@ -5,6 +5,34 @@ let db = require("../models");
 const isAuthenticated = require(`../config/middleware/isAuthenticated`);
 const passport = require(`../config/passport`);
 const User = require("../models/user");
+const jwt = require("jsonwebtoken");
+
+const authenticateMe = (req)=>{
+    let token = false;
+
+    if(!req.headers){
+        token=false
+    }
+    else if(!req.headers.authorization) {
+        token=false;
+    }
+    else {
+        token = req.headers.authorization.split(" ")[1];
+    }
+    let data = false;
+    if(token){
+        data = jwt.verify(token,"catscatscats",(err,data)=>{
+            if(err) {
+                return false;
+            } else {
+                return data
+            }
+        })
+    }
+    return data;
+}
+
+
 
 
 module.exports = function (app, sequelize) {
@@ -16,8 +44,11 @@ module.exports = function (app, sequelize) {
             // email: req.body.email,
             // first_name: req.body.first_name,
             // last_name: req.body.last_name
-        ).then(data=>{
-            res.json(data)
+        ).then(newUser=>{
+          const token = jwt.sign({
+
+          })
+            res.json(newUser)
         
         }).catch(err=>{
             console.log(err);
@@ -33,29 +64,69 @@ module.exports = function (app, sequelize) {
           username: req.body.username
         }
       }).then(userData => {
-        if (!userData) {
-          req.session.destroy()
+        if(!userData.password){
           res.status(404).send("No such user exists!")
-        } else {
-          console.log(`${req.body.password}, ${userData.password}`);
-          
-          if (bcrypt.compareSync(req.body.password, userData.password)) {
-            req.session.user = {
-              id: userData.id,
-              username: userData.username,
-              first_name: userData.first_name,
-              last_name: userData.last_name,
-            }
-            res.json(userData)
-          } else {
-            req.session.destroy()
-            res.status(401).send("Wrong password")
-          }
         }
+        // if (!userData) {
+        //   req.session.destroy()
+        //   res.status(404).send("No such user exists!")
+        // } else {
+        //   console.log(`${req.body.password}, ${userData.password}`);
+          
+         else if (bcrypt.compareSync(req.body.password, userData.password)) {
+           const token = jwt.sign({
+            username: userData.username,
+            id: userData.id
+          }, "connectflix",
+          {
+            expiresIn: "2h"
+          })
+            // req.session.user = {
+            //   id: userData.id,
+            //   username: userData.username,
+            //   first_name: userData.first_name,
+            //   last_name: userData.last_name,
+            // }
+            return res.json({userData, token})
+          } else {
+            // req.session.destroy()
+            return res.status(403).send("Wrong password")
+          }
+        // }
       }).catch(err => {
         res.status(500).json(err)
       });
     });
+
+    app.get("/secretclub", (req, res)=>{
+      let token = false;
+      if(!req.headers){
+        token=false
+      }
+      else if(!req.headers.authorization){
+        token=false
+      }
+      else {
+        token = req.headers.authorization.split(" ")[1]
+      }
+      if(!token){
+        res.status(403).send("log in first")
+      }
+      else {
+        const data = jwt.verify(token, "connectflix", (err, data)=>{
+          if(err){
+            return false
+          } else {
+            return data
+          }
+        })
+        if(data){
+          res.send("You're in " + data.username)
+        } else {
+          res.status(403).send("Authorization failed")
+        }
+      }
+    })
 
     // Likes route to record which movies are liked by user
     app.post("/api/likes", function (req, res) {
