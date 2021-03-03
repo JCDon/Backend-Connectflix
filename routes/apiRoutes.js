@@ -38,6 +38,7 @@ const authenticateMe = (req)=>{
 module.exports = function (app, sequelize) {
   // Signup Route
     app.post("/api/signup", function (req, res) {
+      console.log("req.body", req.body);
         db.User.create(req.body
             // username: req.body.username,
             // password: req.body.password,
@@ -45,15 +46,18 @@ module.exports = function (app, sequelize) {
             // first_name: req.body.first_name,
             // last_name: req.body.last_name
         ).then(newUser=>{
+          console.log("req.body", req.body);
           const token = jwt.sign({
             username: newUser.username,
             email: newUser.email,
+            first_name: newUser.first_name,
+            last_name: newUser.last_name,
             id: newUser.id
           }, "connectflix",
           {
             expiresIn: "5h"
           })
-            res.json(newUser)
+          return res.json({ user: newUser, token })
         
         }).catch(err=>{
             console.log(err);
@@ -64,11 +68,15 @@ module.exports = function (app, sequelize) {
     // Login Route
     app.post("/api/login", (req, res) => {
       console.log("hitting login");
+      console.log(req.body);
+      
       db.User.findOne({
         where: {
           username: req.body.username
-        }
+        },
+        // include: [db.Likes]
       }).then(userData => {
+        console.log("userdata ", userData);
         if(!userData.password){
           res.status(404).send("No such user exists!")
         }
@@ -79,6 +87,7 @@ module.exports = function (app, sequelize) {
         //   console.log(`${req.body.password}, ${userData.password}`);
           
          else if (bcrypt.compareSync(req.body.password, userData.password)) {
+          
            const token = jwt.sign({
             username: userData.username,
             email: userData.email,
@@ -87,6 +96,7 @@ module.exports = function (app, sequelize) {
           {
             expiresIn: "5h"
           })
+          console.log("token ", token);
             // req.session.user = {
             //   id: userData.id,
             //   username: userData.username,
@@ -136,19 +146,26 @@ module.exports = function (app, sequelize) {
 
     // Likes route to record which movies are liked by user
     app.post("/api/likes", function (req, res) {
+      console.log("hitting likes");
+      const userData = authenticateMe(req);
+      if(!userData){
+        res.status(403).send("login first man");
+    } else {
         db.Likes.create({
-          UserId: req.session.user.id,
+          UserId: userData.id,
           title: req.body.title,
           poster: req.body.poster,
           imdb: req.body.imdb,
           synopsis: req.body.synopsis
         }).then(data=>{
+          // console.log(userData);
             res.json(data)
         
         }).catch(err=>{
             console.log(err);
             res.status(500).json(err)
         })
+      }
     });
 
 

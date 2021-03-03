@@ -23,17 +23,17 @@ module.exports = function(sequelize, DataTypes) {
   })
 
 
-  User.prototype.validPassword = function(password) {
-    return bcrypt.compareSync(password, this.password);
-  };
-  User.addHook(`beforeSave`, user => {
-    const rounds = 10;
-    user.password = bcrypt.hashSync(
-      user.password,
-      bcrypt.genSaltSync(rounds),
-      null
-    );
-  });
+  // User.prototype.validPassword = function(password) {
+  //   return bcrypt.compareSync(password, this.password);
+  // };
+  // User.addHook(`beforeSave`, user => {
+  //   const rounds = 10;
+  //   user.password = bcrypt.hashSync(
+  //     user.password,
+  //     bcrypt.genSaltSync(rounds),
+  //     null
+  //   );
+  // });
 
   return User;
 };
