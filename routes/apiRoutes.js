@@ -63,12 +63,14 @@ module.exports = function (app, sequelize) {
       } else {
         // if there is no logged in user, return all data with no connected info
         // should not display a button to connect/disconnect unless logged in
+        // res.status(403).send("login first man")
         res.json(dbUser)
       }
-    }).catch(err => {
-      console.log(err.message);
-      res.status(500).send(err.message);
-    });
+    })
+    // .catch(err => {
+    //   console.log(err.message);
+    //   res.status(500).send(err.message);
+    // });
   });
 
 
@@ -157,6 +159,61 @@ module.exports = function (app, sequelize) {
     }
   });
 
+  // app.get('/friends', (req, res) => {
+  //   let userData = authenticateMe(req);
+  //   if (userData) {
+  //     db.User.findOne({
+  //       where: {
+  //         id: userData.id
+  //       },
+  //       include: [{
+  //         model: db.User,
+  //         as: 'Friend'
+  //       }]
+  //     }).then(userFriends => {
+  //       const userFriendsArr = userFriends.Friend.map(obj => obj.id);
+  //       db.User.findAll({
+  //         where: {
+  //           id: {
+  //             [Op.and]: {
+  //               [Op.notIn]: userFriendsArr,
+  //               [Op.ne]: userData.id
+  //             }
+  //           }
+  //         }
+  //       }).then(nonFriends => {
+  //         const friendsArr = userFriends.Friend.map(obj => {
+  //           const friendObj = obj.toJSON()
+  //           friendObj.isConnected = true;
+  //           return friendObj;
+  //         });
+  
+  //         const nonFriendsArr = nonFriends.map(obj => {
+  //           const nonfriendObj = obj.toJSON()
+  //           nonfriendObj.isConnected = false;
+  //           return nonfriendObj;
+  //         });
+  //         const hbsObj = {
+  //           user: userData.id,
+  //           friends: friendsArr,
+  //           nonfriends: nonFriendsArr
+  //         }
+  //         if (friendsArr.length === 0) {
+  //           hbsObj.hasFriends = false;
+  //         } else {
+  //           hbsObj.hasFriends = true;
+  //         }
+  //         res.render(hbsObj)
+  //       })
+  //     }).catch(err => {
+  //       console.log(err.message);
+  //       res.status(500).send(err.message)
+  //     });
+  //   }
+  // })
+  
+
+
 
   app.put("/api/addFriend", (req, res) => {
     console.log("hitting addFriend");
@@ -216,3 +273,4 @@ module.exports = function (app, sequelize) {
   })
 
 }
+  
