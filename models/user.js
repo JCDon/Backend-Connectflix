@@ -1,4 +1,6 @@
 const bcrypt = require("bcrypt")
+// const UserFriend = require("./UserFriend")
+// console.log(UserFriend);
 module.exports = function(sequelize, DataTypes) {
   var User = sequelize.define("User", {
     // Giving the User model a name of type STRING
@@ -15,7 +17,18 @@ module.exports = function(sequelize, DataTypes) {
     User.hasMany(models.Likes, {
       onDelete: "cascade"
     });
-    User.belongsToMany(models.User, { as: 'Friend', through: 'UserFriend' });
+    User.belongsToMany(models.User,
+       { 
+         as: 'Friend', 
+         through: "UserFriend" 
+        }
+        );
+    // User.belongsToMany(models.User,
+    //    { 
+    //      as: 'User_Friend',
+    //      through: "UserFriend" 
+    //     }
+    //     );
   };
   // utilize bcrypt to encrypt password
   User.beforeCreate(user => {
