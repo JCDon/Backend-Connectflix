@@ -5,8 +5,8 @@
 // *** Dependencies
 // =============================================================
 var express = require("express");
-const passport = require(`./config/passport`);
-const session = require(`express-session`);
+// const passport = require(`./config/passport`);
+// const session = require(`express-session`);
 var cors = require('cors')
 
 // Sets up the Express App
@@ -24,11 +24,11 @@ app.use(cors())
 
 // Static directory
 app.use(express.static("public"));
-app.use(
-  session({ secret: `secret password`, resave: true, saveUninitialized: true })
-);
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(
+//   session({ secret: `secret password`, resave: true, saveUninitialized: true })
+// );
+// app.use(passport.initialize());
+// app.use(passport.session());
 
 // Routes
 // =============================================================

@@ -2,7 +2,7 @@ module.exports = function(sequelize, DataTypes) {
   var Likes = sequelize.define("Likes", {
     title: DataTypes.STRING,
     poster: DataTypes.STRING,
-    imdb: DataTypes.STRING,
+    imdb: DataTypes.DECIMAL(10, 2),
     synopsis: DataTypes.STRING
   });
 
