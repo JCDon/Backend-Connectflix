@@ -3,7 +3,6 @@ const bcrypt = require('bcrypt')
 let db = require("../models");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-
 const authenticateMe = (req) => {
   let token = false;
 
@@ -79,7 +78,7 @@ module.exports = function (app, sequelize) {
     // console.log("req.body", req.body);
     db.User.create(req.body
     ).then(newUser => {
-      // console.log("req.body", req.body);
+      console.log("req.body", req.body);
       const token = jwt.sign({
         username: newUser.username,
         id: newUser.id
@@ -149,9 +148,20 @@ module.exports = function (app, sequelize) {
         imdb: req.body.imdb,
         synopsis: req.body.synopsis
       }).then(data => {
+        db.User.findAll({
+          where: {
+            id: userData.id,
+          },
+            include: [{model: db.User, as: "Friend"}]
+              
+            
+        }).then(data => {
+          console.log(data)
         // console.log(userData);
-        res.json(data)
-
+        // console.log(data.getUsers());
+          res.json(data);
+        // db.User.get("Friend")
+        })
       }).catch(err => {
         console.log(err);
         res.status(500).json(err)
@@ -217,6 +227,7 @@ module.exports = function (app, sequelize) {
 
   app.put("/api/addFriend", (req, res) => {
     console.log("hitting addFriend");
+    console.log(req.body);
     // find the logged in user
     let userData = authenticateMe(req);
     console.log("userData ", userData);
