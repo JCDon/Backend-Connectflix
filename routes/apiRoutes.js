@@ -133,7 +133,7 @@ module.exports = function (app, sequelize) {
 
 
   // Likes route to record which movies are liked by user
-  app.post("/api/likes", function (req, res) {
+  app.post("/api/likes", async function (req, res) {
     // console.log("hitting likes");
     // console.log("req ", req.body);
     let userData = authenticateMe(req);
@@ -141,15 +141,15 @@ module.exports = function (app, sequelize) {
     if (!userData) {
       res.status(403).send("login first man");
     } else {
-      db.Likes.create({
+      const likedMovie = await db.Likes.create({
         UserId: userData.id,
         title: req.body.title,
         poster: req.body.poster,
         imdb: req.body.imdb,
         synopsis: req.body.synopsis
-      }).then(data => {
-        db.User.findAll({
-          
+      })
+      console.log(likedMovie);
+      const userFriendLikes = await db.User.findAll({
           where: {
             id: userData.id,
           },
@@ -160,79 +160,27 @@ module.exports = function (app, sequelize) {
               attributes: ["title"]
             }]
           }]
-        }).then(data => {
-          console.log(data)
-        // console.log(userData);
-        // console.log(data.getUsers());
-          res.json(data);
-        // db.User.get("Friend")
         })
-      }).catch(err => {
-        console.log(err);
-        res.status(500).json(err)
-      })
+        console.log(userFriendLikes);
+        // current user's list of friends and which movies they liked. Loop through userFriendLikes to find if a movie in array matches likedMovie
+        for (let i = 0; i < userFriendLikes[0].Friend[0].Likes.length; i++) {
+          if(likedMovie.title===userFriendLikes[0].Friend[0].Likes[i].title){
+            res.json(true)
+          }
+        }
+        res.json(false)
     }
   });
-
-  // app.get('/friends', (req, res) => {
-  //   let userData = authenticateMe(req);
-  //   if (userData) {
-  //     db.User.findOne({
-  //       where: {
-  //         id: userData.id
-  //       },
-  //       include: [{
-  //         model: db.User,
-  //         as: 'Friend'
-  //       }]
-  //     }).then(userFriends => {
-  //       const userFriendsArr = userFriends.Friend.map(obj => obj.id);
-  //       db.User.findAll({
-  //         where: {
-  //           id: {
-  //             [Op.and]: {
-  //               [Op.notIn]: userFriendsArr,
-  //               [Op.ne]: userData.id
-  //             }
-  //           }
-  //         }
-  //       }).then(nonFriends => {
-  //         const friendsArr = userFriends.Friend.map(obj => {
-  //           const friendObj = obj.toJSON()
-  //           friendObj.isConnected = true;
-  //           return friendObj;
-  //         });
-  
-  //         const nonFriendsArr = nonFriends.map(obj => {
-  //           const nonfriendObj = obj.toJSON()
-  //           nonfriendObj.isConnected = false;
-  //           return nonfriendObj;
-  //         });
-  //         const hbsObj = {
-  //           user: userData.id,
-  //           friends: friendsArr,
-  //           nonfriends: nonFriendsArr
-  //         }
-  //         if (friendsArr.length === 0) {
-  //           hbsObj.hasFriends = false;
-  //         } else {
-  //           hbsObj.hasFriends = true;
-  //         }
-  //         res.render(hbsObj)
-  //       })
-  //     }).catch(err => {
-  //       console.log(err.message);
-  //       res.status(500).send(err.message)
-  //     });
-  //   }
-  // })
   
 
 
+// add user in database as association "friend"
 
   app.put("/api/addFriend", (req, res) => {
     console.log("hitting addFriend");
     console.log(req.body);
+
+
     // find the logged in user
     let userData = authenticateMe(req);
     console.log("userData ", userData);
@@ -243,13 +191,11 @@ module.exports = function (app, sequelize) {
         where: {
           id: userData.id
         },
-        // include: [{
-        //   model: db.User,
-        //   as: 'Friend'
-        // }]
       }).then(dbUser => {
         console.log("dbUser ", dbUser);
+
         // add the targeted user as an association
+
         dbUser.addFriend(req.body.friendId)
         res.json(dbUser)
       }).catch(err => {
@@ -258,6 +204,8 @@ module.exports = function (app, sequelize) {
       })
     }
   })
+
+  
   app.get("/secretclub", (req, res) => {
     let token = false;
     if (!req.headers) {
