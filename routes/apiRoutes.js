@@ -149,12 +149,17 @@ module.exports = function (app, sequelize) {
         synopsis: req.body.synopsis
       }).then(data => {
         db.User.findAll({
+          
           where: {
             id: userData.id,
           },
-            include: [{model: db.User, as: "Friend"}]
-              
-            
+          attributes: ["username"],
+            include: [{model: db.User, as: "Friend",
+            attributes: ["username"],
+            include: [{model: db.Likes, 
+              attributes: ["title"]
+            }]
+          }]
         }).then(data => {
           console.log(data)
         // console.log(userData);
