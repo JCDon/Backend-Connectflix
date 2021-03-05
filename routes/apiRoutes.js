@@ -60,25 +60,19 @@ module.exports = function (app, sequelize) {
         })
         res.json(usersFriendData);
       } else {
-        // if there is no logged in user, return all data with no connected info
-        // should not display a button to connect/disconnect unless logged in
-        // res.status(403).send("login first man")
         res.json(dbUser)
       }
     })
-    // .catch(err => {
-    //   console.log(err.message);
-    //   res.status(500).send(err.message);
-    // });
   });
 
 
   // Signup Route
   app.post("/api/signup", function (req, res) {
-    // console.log("req.body", req.body);
+
+    // Create a User based on req.body and authenticate with jwt
+
     db.User.create(req.body
     ).then(newUser => {
-      console.log("req.body", req.body);
       const token = jwt.sign({
         username: newUser.username,
         id: newUser.id
@@ -173,6 +167,32 @@ module.exports = function (app, sequelize) {
   });
   
 
+  // get user's friends likes so we can use them in to the frontend
+app.get("/api/userFriendLikes", function (req, res){
+  let userData = authenticateMe(req);
+    console.log(userData);
+    if (!userData) {
+      res.status(403).send("login first man");
+    } else {
+  db.User.findAll({
+    where: {
+      id: userData.id,
+    },
+    attributes: ["username"],
+      include: [{model: db.User, as: "Friend",
+      attributes: ["username"],
+      include: [{model: db.Likes, 
+        attributes: ["title"]
+      }]
+    }]
+  }).then(data =>{
+    res.json(data)
+  }).catch(err => {
+    console.log(err.message);
+    res.status(500).send(err.message)
+  })
+}
+})
 
 // add user in database as association "friend"
 
